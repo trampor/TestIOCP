@@ -1,0 +1,73 @@
+一、服务器端设置
+注册表：HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters
+添加或修改下面表项
+1、
+键值：SynAttackProtect
+类型：REG_DWORD
+范围：0，1
+从WIN2003 SP1开始默认值是1。这个值决定了系统受到SYN攻击时采取的保护措施，包括减少系统SYN+ACK的重试的次数等。
+
+2、
+键值：TcpMaxHalfOpen
+类型：REG_DWORD
+范围：100-0xFFFF
+这个值是系统允许同时打开的半连接。默认情况下WIN2K PRO和SERVER是100，ADVANCED SERVER是500，WIN2003是5000。
+
+3、
+键值：TcpMaxHalfOpenRetried
+类型：REG_DWORD
+范围：80-0xFFFF
+这个值决定了在什么情况下系统会打开SYN攻击保护。默认情况下WIN2K PRO和SERVER是80，ADVANCED SERVER是400，WIN2003是2500。
+退出注册表编辑器，并重新启动计算机。
+
+二、客户端
+    如果您尝试建立 TCP 连接从大于 5000 的端口，本地计算机将响应以下 WSAENOBUFS (10055） 错误消息：  
+由于系统缺少缓冲区空间不足或队列已满，无法执行套接字上的操作。
+    默认最大的临时 TCP 端口的数是 5000 。 要提高临时端口的上限，请按照下列步骤操作：启动注册表编辑器。在的注册表中找到以下子项，然后单击 参数 ： 
+    HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters
+    添加或修改下面表项
+1、
+数值：MaxUserPort  
+类型：REG_DWORD
+范围： 5000-65534 (十进制)
+默认值： 0x1388 (5000 十进制)
+    说明： 此参数将控制程序从系统请求任何可用的用户端口时使用的最大端口数。 通常，1024 的值和包含的 5000 之间分配临时的 （短) 端口。  
+ 
+    请注意 其他的 TCPTimedWaitDelay 注册表参数确定在多长时间关闭的端口等可重复使用已关闭的端口。
+
+2、
+数值：TcpNumConnections
+类型：REG_DWORD
+范围： 根据需要设置
+    说明：此参数是决定客户端最大连接的数值。
+
+3、
+运行BetterSP2.exe，设置最大连接数和TcpNumConnections一致
+
+重新启动计算机。
+
+
+三、成功的注册表例子（10万连接设置）
+"NameServer"=""
+"ForwardBroadcasts"=dword:00000000
+"IPEnableRouter"=dword:00000001
+"Domain"=""
+"Hostname"="Deep-20100325NL"
+"SearchList"=""
+"UseDomainNameDevolution"=dword:00000001
+"EnableICMPRedirect"=dword:00000001
+"DeadGWDetectDefault"=dword:00000001
+"DontAddDefaultGatewayDefault"=dword:00000000
+"EnableSecurityFilters"=dword:00000001
+"TCPWindowSize"=dword:0005ae4c
+"GlobalMaxTcpWindowSize"=dword:0005ae4c
+"ReservedPorts"=hex(7):31,00,34,00,33,00,33,00,2d,00,31,00,34,00,33,00,34,00,\
+  00,00,00,00
+"MaxUserPort"=dword:0000ffff
+"TcpTimedWaitDelay"=dword:0000001e
+"KeepAliveTime"=dword:000927c0
+"TcpNumConnections"=dword:000186a0
+"TcpMaxHalfOpen"=dword:000186a0
+"TcpMaxHalfOpenRetried"=dword:000186a0
+"SynAttackProtect"=dword:00000001
+
