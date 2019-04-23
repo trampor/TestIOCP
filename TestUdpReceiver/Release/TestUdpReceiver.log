@@ -1,0 +1,40 @@
+﻿生成启动时间为 2019/4/22 14:15:03。
+     1>项目“D:\TestIOCP\TestUdpReceiver\TestUdpReceiver.vcxproj”在节点 2 上(Rebuild 个目标)。
+     1>ClCompile:
+         D:\Program Files\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D WIN32 /D _WINDOWS /D NDEBUG /D _USING_V110_SDK71_ /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yc"stdafx.h" /Fp"Release\TestUdpReceiver.pch" /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt stdafx.cpp
+         stdafx.cpp
+         D:\Program Files\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D WIN32 /D _WINDOWS /D NDEBUG /D _USING_V110_SDK71_ /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Release\TestUdpReceiver.pch" /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt CalcCenter.cpp FileWriter.cpp FileWriterIOReq.cpp IOCompletionPortBase.cpp IOReq.cpp TestUdpReceiver.cpp TestUdpReceiverDlg.cpp UdpReceiver.cpp UdpRecvIOReq.cpp
+         CalcCenter.cpp
+     1>CalcCenter.cpp(84): warning C4101: “ret”: 未引用的局部变量
+         FileWriter.cpp
+         FileWriterIOReq.cpp
+         IOCompletionPortBase.cpp
+         IOReq.cpp
+         TestUdpReceiver.cpp
+         TestUdpReceiverDlg.cpp
+     1>TestUdpReceiverDlg.cpp(212): warning C4101: “ptempnode”: 未引用的局部变量
+     1>TestUdpReceiverDlg.cpp(452): warning C4244: “参数”: 从“double”转换到“int”，可能丢失数据
+         UdpReceiver.cpp
+         UdpRecvIOReq.cpp
+       ResourceCompile:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\bin\rc.exe /D NDEBUG /D _USING_V110_SDK71_ /D _UNICODE /D UNICODE /l"0x0804" /IRelease\ /nologo /fo"Release\TestUdpReceiver.res" TestUdpReceiver.rc 
+       Link:
+         D:\Program Files\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\TestIOCP\Release\TestUdpReceiver.exe" /INCREMENTAL:NO /NOLOGO /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /manifestinput:"D:\Program Files\Microsoft Visual Studio 12.0\VC\Include\Manifest\dpiaware.manifest" /DEBUG /PDB:"D:\TestIOCP\Release\TestUdpReceiver.pdb" /SUBSYSTEM:WINDOWS,"5.01" /OPT:REF /OPT:ICF /LTCG /TLBID:1 /ENTRY:"wWinMainCRTStartup" /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\TestIOCP\Release\TestUdpReceiver.lib" /MACHINE:X86 /SAFESEH Release\TestUdpReceiver.res
+         Release\CalcCenter.obj
+         Release\FileWriter.obj
+         Release\FileWriterIOReq.obj
+         Release\IOCompletionPortBase.obj
+         Release\IOReq.obj
+         Release\stdafx.obj
+         Release\TestUdpReceiver.obj
+         Release\TestUdpReceiverDlg.obj
+         Release\UdpReceiver.obj
+         Release\UdpRecvIOReq.obj
+         正在生成代码
+         已完成代码的生成
+         TestUdpReceiver.vcxproj -> D:\TestIOCP\Release\TestUdpReceiver.exe
+     1>已完成生成项目“D:\TestIOCP\TestUdpReceiver\TestUdpReceiver.vcxproj”(Rebuild 个目标)的操作。
+
+生成成功。
+
+已用时间 00:00:33.60
