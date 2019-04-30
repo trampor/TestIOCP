@@ -1,0 +1,24 @@
+﻿生成启动时间为 2019/4/26 16:12:39。
+     1>项目“D:\TestIOCP\TestIOCPServer\TestIOCPServer.vcxproj”在节点 2 上(Rebuild 个目标)。
+     1>ClCompile:
+         D:\Program Files\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yc"stdafx.h" /Fp"Debug\TestIOCPServer.pch" /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt stdafx.cpp
+         stdafx.cpp
+         D:\Program Files\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Debug\TestIOCPServer.pch" /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt CommParam.cpp MemCache.cpp TcpIOCPClient.cpp TcpIOCPClientManager.cpp TcpIOCPClientStub.cpp TcpIOCPServer.cpp TcpIOCPServerImp.cpp TcpNetworkConsumer.cpp TestIOCPServer.cpp TestIOCPServerDlg.cpp
+         TestIOCPServerDlg.cpp
+         TestIOCPServer.cpp
+         TcpNetworkConsumer.cpp
+         TcpIOCPServerImp.cpp
+     1>d:\testiocp\testiocpserver\tcpiocpserverimp.cpp(91): error C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+                 c:\program files (x86)\windows kits\8.1\include\um\winsock2.h(1850) : 参见“inet_addr”的声明
+         TcpIOCPServer.cpp
+         TcpIOCPClientStub.cpp
+         TcpIOCPClientManager.cpp
+         TcpIOCPClient.cpp
+         MemCache.cpp
+         CommParam.cpp
+         正在生成代码...
+     1>已完成生成项目“D:\TestIOCP\TestIOCPServer\TestIOCPServer.vcxproj”(Rebuild 个目标)的操作 - 失败。
+
+生成失败。
+
+已用时间 00:00:26.25

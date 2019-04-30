@@ -33,16 +33,10 @@
     <ClInclude Include="Resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="CalcCenter.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="IOReq.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="UdpReceiver.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="UdpRecvIOReq.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="FileWriter.h">
@@ -63,6 +57,27 @@
     <ClInclude Include="IOCompletionPortBase.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="TcpListenerIOReq.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TcpListener.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TcpListenerBase.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TcpWorker.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IOCompletionPortCenter.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TcpWorkerIOReq.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="UdpReceiverIOReq.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TestUdpReceiver.cpp">
@@ -74,16 +89,10 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="CalcCenter.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="IOReq.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="UdpReceiver.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="UdpRecvIOReq.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="FileWriter.cpp">
@@ -93,6 +102,24 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="IOCompletionPortBase.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TcpListenerIOReq.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TcpListenerBase.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TcpWorker.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IOCompletionPortCenter.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TcpWorkerIOReq.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="UdpReceiverIOReq.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

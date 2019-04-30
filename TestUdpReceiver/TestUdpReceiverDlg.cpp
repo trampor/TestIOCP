@@ -64,6 +64,11 @@ CTestUdpReceiverDlg::~CTestUdpReceiverDlg()
 		(*iter)->UninitObject();
 	}
 
+	for (auto iter = m_TcpList.begin(); iter != m_TcpList.end(); iter++)
+	{
+		(*iter)->UninitObject();
+	}
+
 	for (auto iter = m_FileList.begin(); iter != m_FileList.end(); iter++)
 	{
 		(*iter)->UninitObject();
@@ -77,6 +82,12 @@ CTestUdpReceiverDlg::~CTestUdpReceiverDlg()
 	}
 	m_RecvList.clear();
 
+	for (auto iter = m_TcpList.begin(); iter != m_TcpList.end(); iter++)
+	{
+		delete *iter;
+	}
+	m_TcpList.clear();
+
 	for (auto iter = m_FileList.begin(); iter != m_FileList.end(); iter++)
 	{
 		delete *iter;
@@ -84,6 +95,9 @@ CTestUdpReceiverDlg::~CTestUdpReceiverDlg()
 	m_FileList.clear();
 
 	CUdpReceiver::ReleaseAllList();
+	CTcpListenerBase::ReleaseAllList();
+	CTcpListener<CTcpWorker>::ReleaseAllList();
+	CTcpWorker::ReleaseAllList();
 	CFileWriter::ReleaseAllList();
 
 	//m_brun = false;
@@ -114,6 +128,7 @@ void CTestUdpReceiverDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_LIST_RECVLIST, m_cRecvList);
+	DDX_Control(pDX, IDC_LIST_TCP, m_cTcpList);
 }
 
 BEGIN_MESSAGE_MAP(CTestUdpReceiverDlg, CDialogEx)
@@ -127,6 +142,10 @@ BEGIN_MESSAGE_MAP(CTestUdpReceiverDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_STARTALL, &CTestUdpReceiverDlg::OnBnClickedButtonStartall)
 	ON_BN_CLICKED(IDC_BUTTON_STOPALL, &CTestUdpReceiverDlg::OnBnClickedButtonStopall)
 	ON_WM_TIMER()
+	ON_BN_CLICKED(IDC_BUTTON_TCPADD, &CTestUdpReceiverDlg::OnBnClickedButtonTcpadd)
+	ON_BN_CLICKED(IDC_BUTTON_TCPSTOP, &CTestUdpReceiverDlg::OnBnClickedButtonTcpstop)
+	ON_BN_CLICKED(IDC_BUTTON_TCPSTART, &CTestUdpReceiverDlg::OnBnClickedButtonTcpstart)
+	ON_BN_CLICKED(IDC_BUTTON_TCPDEL, &CTestUdpReceiverDlg::OnBnClickedButtonTcpdel)
 END_MESSAGE_MAP()
 
 
@@ -179,6 +198,11 @@ BOOL CTestUdpReceiverDlg::OnInitDialog()
 	SetDlgItemText(IDC_EDIT_MULTIPORT, _T("2424"));
 	SetDlgItemText(IDC_EDIT_FILEPATH, _T("e:\\temp.ts"));
 
+
+	SetDlgItemText(IDC_EDIT_TCPIP, _T("192.168.1.99"));
+	SetDlgItemText(IDC_EDIT_TCPPORT, _T("3333"));
+
+
 	m_cRecvList.SetImageList(&m_itemImageList, LVSIL_SMALL);
 	m_cRecvList.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_DOUBLEBUFFER);
 	m_cRecvList.InsertColumn(0, _T(""), LVCFMT_CENTER, 0);
@@ -192,6 +216,14 @@ BOOL CTestUdpReceiverDlg::OnInitDialog()
 	m_cRecvList.InsertColumn(8, _T("FileRecv"), LVCFMT_CENTER, 80);
 	m_cRecvList.InsertColumn(9, _T("FileWrite"), LVCFMT_CENTER, 80);
 
+	m_cTcpList.SetImageList(&m_itemImageList, LVSIL_SMALL);
+	m_cTcpList.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_DOUBLEBUFFER);
+	m_cTcpList.InsertColumn(0, _T(""), LVCFMT_CENTER, 0);
+	m_cTcpList.InsertColumn(1, _T("Host"), LVCFMT_CENTER, 150);
+	m_cTcpList.InsertColumn(2, _T("Link Num"), LVCFMT_CENTER, 150);
+	m_cTcpList.InsertColumn(3, _T("Status"), LVCFMT_CENTER, 150);
+
+
 	m_CalcCenter.InitObj(0);
 
 	m_nLastTickCount = 0;
@@ -200,36 +232,6 @@ BOOL CTestUdpReceiverDlg::OnInitDialog()
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
-unsigned WINAPI CTestUdpReceiverDlg::InitTestThread(LPVOID pv)
-{
-	CTestUdpReceiverDlg* lpInst = (CTestUdpReceiverDlg*)pv;
-	return lpInst->TestThread();
-}
-
-unsigned CTestUdpReceiverDlg::TestThread()
-{
-	int count = 0,*pval;
-	CNoLockBiListNode<int> *ptempnode;
-	for (; m_brun; )
-	{
-		pval = templist.PopHead();
-		if (pval != NULL)
-		{
-			templist.PushTail((int)pval);
-			count++;
-		}
-		else
-			OutputDebugString(_T("read null node\n"));
-		Sleep(1);
-	}
-
-	CString tempstr;
-	tempstr.Format(_T("getnodenum %d\n"),count);
-	OutputDebugString(tempstr);
-
-	return 0;
-}
-
 
 void CTestUdpReceiverDlg::OnSysCommand(UINT nID, LPARAM lParam)
 {
@@ -466,8 +468,112 @@ void CTestUdpReceiverDlg::OnTimer(UINT_PTR nIDEvent)
 			index++;
 		}
 
+		index = 0;
+		for (auto iter = m_TcpList.begin(); iter != m_TcpList.end(); iter++)
+		{
+			_itow_s((*iter)->GetPacketNum(), temp, 10);
+			m_cTcpList.SetItemText(index, 2, temp);
+			_itow_s((*iter)->GetStatus(), temp, 10);
+			m_cTcpList.SetItemText(index, 3, temp);
+			index++;
+		}
 		m_nLastTickCount = curtickcount;
 	}
 
 	CDialogEx::OnTimer(nIDEvent);
+}
+
+
+void CTestUdpReceiverDlg::OnBnClickedButtonTcpadd()
+{
+	TCHAR localip[256], temp[10];
+	int port;
+
+	GetDlgItemText(IDC_EDIT_TCPIP, localip, 256);
+	port = GetDlgItemInt(IDC_EDIT_TCPPORT);
+
+	CTcpListener<CTcpWorker> *precv = new CTcpListener<CTcpWorker>;
+	int result = precv->InitObject(localip, port);
+	if (result < 0)
+		return;
+
+	int index = m_cTcpList.InsertItem(m_cTcpList.GetItemCount(), NULL);
+	_itow_s(port, temp, 10);
+	CString tempstr = localip;
+	tempstr += _T(":");
+	tempstr += temp;
+	m_cTcpList.SetItemText(index, 1, tempstr);
+
+	m_TcpList.push_back(precv);
+
+	m_cTcpList.SetItemState(index, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
+}
+
+void CTestUdpReceiverDlg::OnBnClickedButtonTcpstart()
+{
+	POSITION pos = m_cTcpList.GetFirstSelectedItemPosition();
+	while (pos != NULL)
+	{
+		int cursel = m_cTcpList.GetNextSelectedItem(pos);
+		int index = 0;
+		for (auto iter = m_TcpList.begin(); iter != m_TcpList.end(); iter++)
+		{
+			if (index == cursel)
+			{
+				if ((*iter)->Start(&m_CalcCenter) < 0)
+				{
+					OutputDebugString(_T("tcp start fail"));
+					(*iter)->Stop();
+				}
+				break;
+			}
+			index++;
+		}
+		break;
+	}
+}
+
+void CTestUdpReceiverDlg::OnBnClickedButtonTcpstop()
+{
+	POSITION pos = m_cTcpList.GetFirstSelectedItemPosition();
+	while (pos != NULL)
+	{
+		int cursel = m_cTcpList.GetNextSelectedItem(pos);
+		int index = 0;
+		for (auto iter = m_TcpList.begin(); iter != m_TcpList.end(); iter++)
+		{
+			if (index == cursel)
+			{
+				(*iter)->Stop();
+				break;
+			}
+			index++;
+		}
+		break;
+	}
+}
+
+
+
+void CTestUdpReceiverDlg::OnBnClickedButtonTcpdel()
+{
+	POSITION pos = m_cTcpList.GetFirstSelectedItemPosition();
+	while (pos != NULL)
+	{
+		int cursel = m_cTcpList.GetNextSelectedItem(pos);
+		int index = 0;
+		for (auto iter = m_TcpList.begin(); iter != m_TcpList.end(); iter++)
+		{
+			if (index == cursel)
+			{
+				(*iter)->Stop();
+				(*iter)->UninitObject();
+				delete *iter;
+				m_TcpList.erase(iter);
+				m_cTcpList.DeleteItem(cursel);
+				break;
+			}
+			index++;
+		}
+	}
 }

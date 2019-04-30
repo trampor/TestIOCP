@@ -3,7 +3,7 @@
 
 template <class EleType>
 CNoLockBiList<EleType>::CNoLockBiList()
-	:phead(NULL), ptail(NULL), pnullhead(NULL), pnulltail(NULL), m_nAllocatedEleNum(0), m_nNodeNum(0)
+	:phead(NULL), ptail(NULL), pnullhead(NULL), pnulltail(NULL), m_nAllocatedEleNum(0), m_nNodeNum(0),m_nEleNum(0)
 {
 }
 
@@ -56,6 +56,7 @@ EleType* CNoLockBiList<EleType>::PopHead()
 				phead = NULL;
 				pele = (EleType*)ptailnode->ele;
 				PushNullTail((CNoLockBiListNode<EleType>*)ptailnode);
+				InterlockedDecrement(&m_nEleNum);
 				return pele;
 			}
 		}
@@ -67,6 +68,7 @@ EleType* CNoLockBiList<EleType>::PopHead()
 				ptailnode->pprev = NULL;
 				pele = (EleType*)pheadnode->ele;
 				PushNullTail((CNoLockBiListNode<EleType>*)pheadnode);
+				InterlockedDecrement(&m_nEleNum);
 				return pele;
 			}
 		}
@@ -95,6 +97,7 @@ bool CNoLockBiList<EleType>::PushTail(EleType e)
 			if (InterlockedCompareExchangePointer((PVOID*)&phead, pnode, NULL) == NULL)
 			{
 				ptail = pnode;
+				InterlockedIncrement(&m_nEleNum);
 				return true;
 			}
 		}
@@ -104,6 +107,7 @@ bool CNoLockBiList<EleType>::PushTail(EleType e)
 			if (InterlockedCompareExchangePointer((PVOID*)&ptail, pnode, (PVOID)ptailnode) == ptailnode)
 			{
 				ptailnode->pnext = pnode;
+				InterlockedIncrement(&m_nEleNum);
 				return true;
 			}
 		}

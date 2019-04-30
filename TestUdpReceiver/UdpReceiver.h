@@ -1,18 +1,12 @@
 #pragma once
 
-#include "UdpRecvIOReq.h"
+#include "UdpReceiverIOReq.h"
 #include "dataobserver.h"
 #include <list>
 #include <string>
 #include "iocompletionportbase.h"
 #include "NoLockBiList.h"
 using namespace std;
-
-#define RECVBUFSIZE 4*1024
-
-#define RECVSTATUSSTOP 0
-#define RECVSTATUSRUN 1
-#define RECVSTATUSERROR 2
 
 class CUdpReceiver : public CReqObserver, public CBufSource
 {
@@ -44,8 +38,11 @@ public:
 
 	static int ReleaseAllList();
 
+	virtual int ReadedDataProcess(unsigned char* pdatabuf,int datasize);
+
 private:
 	SOCKET MakeMultiSocket(LPCTSTR plocalip, LPCTSTR psourceip, LPCTSTR pmultiip, int port);
+	int Read();
 
 private:
 	SOCKET m_UdpSocket;
@@ -61,7 +58,7 @@ private:
 	long m_nRecvNum, m_nRecvedNum;
 
 	static CNoLockBiList<unsigned char*> m_BufList;
-	static CNoLockBiList<CUdpRecvIOReq*> m_IOReqList;
+	static CNoLockBiList<CUdpReceiverIOReq*> m_IOReqList;
 
 	SRWLOCK m_ObserverLock;
 };

@@ -28,6 +28,7 @@ private:
 	volatile CNoLockBiListNode<EleType>* pnullhead;
 	volatile CNoLockBiListNode<EleType>* pnulltail;
 
+	volatile long m_nEleNum;
 	volatile long m_nNodeNum;
 };
 

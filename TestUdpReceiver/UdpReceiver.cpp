@@ -2,16 +2,18 @@
 #include "UdpReceiver.h"
 
 CNoLockBiList<unsigned char*> CUdpReceiver::m_BufList;
-CNoLockBiList<CUdpRecvIOReq*> CUdpReceiver::m_IOReqList;
+CNoLockBiList<CUdpReceiverIOReq*> CUdpReceiver::m_IOReqList;
 
 CUdpReceiver::CUdpReceiver()
 {
 	m_nPacketNum = 0;
 	m_nRecvBytesNum = 0;
-	m_nStatus = RECVSTATUSSTOP;
+	m_nStatus = STATUSSTOP;
 
 	m_nRecvNum = 0;
 	m_nRecvedNum = 0;
+
+	m_UdpSocket = INVALID_SOCKET;
 	
 	InitializeSRWLock(&m_ObserverLock);
 }
@@ -30,11 +32,11 @@ int CUdpReceiver::ReleaseAllList()
 		pDataBuf = (unsigned char*)m_BufList.PopHead();
 	}
 
-	CUdpRecvIOReq* pIOReq = (CUdpRecvIOReq*)m_IOReqList.PopHead();
+	CUdpReceiverIOReq* pIOReq = (CUdpReceiverIOReq*)m_IOReqList.PopHead();
 	while (pIOReq != NULL)
 	{
 		delete pIOReq;
-		pIOReq = (CUdpRecvIOReq*)m_IOReqList.PopHead();
+		pIOReq = (CUdpReceiverIOReq*)m_IOReqList.PopHead();
 	}
 	return 0;
 }
@@ -47,102 +49,26 @@ int CUdpReceiver::ConsumeReq(int bytenumber, int ck, unsigned long error, OVERLA
 		InterlockedExchangeAdd(&m_nRecvBytesNum, bytenumber);
 		InterlockedExchangeAdd(&m_nPacketNum, bytenumber);
 
-		if (m_DataObserverList.empty())
-		{
-			m_BufList.PushTail(((CUdpRecvIOReq*)povlp)->m_pDataBuf);
-			m_IOReqList.PushTail((CUdpRecvIOReq*)povlp);
-		}
-		else
-		{
-			AcquireSRWLockExclusive(&m_ObserverLock);
-			for (auto iter = m_DataObserverList.begin(); iter != m_DataObserverList.end(); iter++)
-			{
-				InterlockedExchangeAdd((long*)(((CUdpRecvIOReq*)povlp)->m_pDataBuf - 4),1);
-				(*iter)->ImportData(((CUdpRecvIOReq*)povlp)->m_pDataBuf, ((CUdpRecvIOReq*)povlp)->m_nBufSize, bytenumber,this);
-			}
-			ReleaseSRWLockExclusive(&m_ObserverLock);
-			m_IOReqList.PushTail((CUdpRecvIOReq*)povlp);
-		}
+		ReadedDataProcess(((CUdpReceiverIOReq*)povlp)->m_pDataBuf, bytenumber);
+		m_IOReqList.PushTail((CUdpReceiverIOReq*)povlp);
 	}
 	else
 	{
 		if (povlp != NULL)
 		{
-			if (((CUdpRecvIOReq*)povlp)->m_pDataBuf != NULL)
-				m_BufList.PushTail(((CUdpRecvIOReq*)povlp)->m_pDataBuf);
+			if (((CUdpReceiverIOReq*)povlp)->m_pDataBuf != NULL)
+				m_BufList.PushTail(((CUdpReceiverIOReq*)povlp)->m_pDataBuf);
 
-			m_IOReqList.PushTail((CUdpRecvIOReq*)povlp);
+			m_IOReqList.PushTail((CUdpReceiverIOReq*)povlp);
 		}
-		m_nStatus = RECVSTATUSERROR;
+		m_nStatus = STATUSERROR;
 		OutputDebugString(_T("CUdpReceiver::ConsumeReq iocomplete error"));
 		return -1;
 	}
 
-	if (m_nStatus != RECVSTATUSRUN)
-		return 0;
-
 	//再次接收
-	unsigned char* pDataBuf = (unsigned char*)m_BufList.PopHead();
-	if (pDataBuf == NULL)
-	{
-		pDataBuf = new unsigned char[RECVBUFSIZE];
-		if (pDataBuf == NULL)
-		{
-			m_nStatus = RECVSTATUSERROR;
-			OutputDebugString(_T("CUdpReceiver::ConsumeReq alloc new buf fail"));
-			return -2;
-		}
-		pDataBuf += 4;
-		InterlockedExchangeAdd(&m_BufList.m_nAllocatedEleNum, 1);
-	}
-	//it's very important,reserved 4 bytes for buf reference count,
-	//before use it,init it to 0,
-	//modify it when dispatch buf to observer or return from observer;
-	*(long*)(pDataBuf-4) = 0;
+	Read();
 
-	CUdpRecvIOReq* pIOReq = (CUdpRecvIOReq*)m_IOReqList.PopHead();
-	if (pIOReq == NULL)
-	{
-		pIOReq = new CUdpRecvIOReq(pDataBuf, RECVBUFSIZE, this);
-		if (pIOReq == NULL)
-		{
-			m_BufList.PushTail(pDataBuf);
-			m_nStatus = RECVSTATUSERROR;
-			OutputDebugString(_T("CUdpReceiver::ConsumeReq alloc new ioreq fail"));
-			return -3;
-		}
-		InterlockedExchangeAdd(&m_IOReqList.m_nAllocatedEleNum, 1);
-	}
-	else
-	{
-		pIOReq->m_pDataBuf = pDataBuf;
-		pIOReq->m_nBufSize = RECVBUFSIZE;
-		pIOReq->m_pObserver = this;
-	}
-
-	m_nFlag = 0;
-	m_WSABUF.buf = (char*)pDataBuf;
-	m_WSABUF.len = RECVBUFSIZE;
-	if ((m_nStatus != RECVSTATUSRUN) || (m_UdpSocket == INVALID_SOCKET))
-	{
-		m_BufList.PushTail(pDataBuf);
-		m_IOReqList.PushTail(pIOReq);
-	}
-	else
-	{
-		int result = WSARecv(m_UdpSocket, &m_WSABUF, 1, &m_unRecvedNumber, &m_nFlag, pIOReq, NULL);
-		if (result == SOCKET_ERROR)
-		{
-			if (WSA_IO_PENDING != WSAGetLastError())
-			{
-				m_BufList.PushTail(pDataBuf);
-				m_IOReqList.PushTail(pIOReq);
-				m_nStatus = RECVSTATUSERROR;
-				OutputDebugString(_T("CUdpReceiver::ConsumeReq WSARecv Fail"));
-			}
-		}
-		m_nRecvNum++;
-	}
 	return 0;
 }
 
@@ -172,10 +98,10 @@ int CUdpReceiver::InitObject(LPCTSTR plocalip, LPCTSTR psourceip, LPCTSTR pmulti
 		InterlockedExchangeAdd(&m_BufList.m_nAllocatedEleNum, 1);
 	}
 
-	CUdpRecvIOReq* ptempioreq;
+	CUdpReceiverIOReq* ptempioreq;
 	for (int i = 0; i <1; i++)
 	{
-		ptempioreq = new CUdpRecvIOReq(NULL,0,this);
+		ptempioreq = new CUdpReceiverIOReq(this);
 		m_IOReqList.PushTail(ptempioreq);
 		InterlockedExchangeAdd(&m_IOReqList.m_nAllocatedEleNum, 1);
 	}
@@ -192,7 +118,7 @@ int CUdpReceiver::UninitObject()
 
 int CUdpReceiver::Start(CIOCompletionPortBase* piocompletionport)
 {
-	if (m_nStatus == RECVSTATUSRUN)
+	if (m_nStatus == STATUSRUN)
 	{
 		OutputDebugString(_T("CUdpReceiver::Start already run"));
 		return 1;
@@ -211,15 +137,25 @@ int CUdpReceiver::Start(CIOCompletionPortBase* piocompletionport)
 		}
 	}
 	
+	m_nRecvNum = 0;
+	m_nRecvedNum = 0;
+	m_nRecvBytesNum = 0;
+
+	Read();
+	return 0;
+}
+
+int CUdpReceiver::Read()
+{
 	unsigned char* pDataBuf = (unsigned char*)m_BufList.PopHead();
 	if (pDataBuf == NULL)
 	{
 		pDataBuf = new unsigned char[RECVBUFSIZE];
 		if (pDataBuf == NULL)
 		{
-			m_nStatus = RECVSTATUSERROR;
+			m_nStatus = STATUSERROR;
 			OutputDebugString(_T("CUdpReceiver::Start alloc new buf fail"));
-			return -2;
+			return -1;
 		}
 		pDataBuf += 4;
 		InterlockedExchangeAdd(&m_BufList.m_nAllocatedEleNum, 1);
@@ -227,30 +163,29 @@ int CUdpReceiver::Start(CIOCompletionPortBase* piocompletionport)
 	//it's very important,reserved 4 bytes for buf reference count,
 	//before use it,init it to 0,
 	//modify it when dispatch buf to observer or return from observer;
-	*(long*)(pDataBuf-4) = 0;
+	*(long*)(pDataBuf - 4) = 0;
 
-	CUdpRecvIOReq* pIOReq = (CUdpRecvIOReq*)m_IOReqList.PopHead();
+	CUdpReceiverIOReq* pIOReq = (CUdpReceiverIOReq*)m_IOReqList.PopHead();
 	if (pIOReq == NULL)
 	{
-		pIOReq = new CUdpRecvIOReq(pDataBuf, RECVBUFSIZE, this);
+		pIOReq = new CUdpReceiverIOReq(this);
 		if (pIOReq == NULL)
 		{
-			m_nStatus = RECVSTATUSERROR;
+			m_nStatus = STATUSERROR;
 			OutputDebugString(_T("CUdpReceiver::Start alloc new ioreq fail"));
-			return -3;
+			return -2;
 		}
 		InterlockedExchangeAdd(&m_IOReqList.m_nAllocatedEleNum, 1);
 	}
 	else
 	{
-		pIOReq->m_pDataBuf = pDataBuf;
-		pIOReq->m_nBufSize = RECVBUFSIZE;
 		pIOReq->m_pObserver = this;
 	}
+	pIOReq->m_pDataBuf = pDataBuf;
+	pIOReq->m_nBufSize = RECVBUFSIZE;
 
 	m_nFlag = 0;
 	m_unRecvedNumber = 0;
-	m_nRecvBytesNum = 0;
 	m_WSABUF.buf = (char*)pDataBuf;
 	m_WSABUF.len = RECVBUFSIZE;
 	int result = WSARecv(m_UdpSocket, &m_WSABUF, 1, &m_unRecvedNumber, &m_nFlag, pIOReq, NULL);
@@ -258,27 +193,27 @@ int CUdpReceiver::Start(CIOCompletionPortBase* piocompletionport)
 	{
 		if (WSA_IO_PENDING != WSAGetLastError())
 		{
-			m_nStatus = RECVSTATUSERROR;
+			m_nStatus = STATUSERROR;
 			m_BufList.PushTail(pDataBuf);
 			m_IOReqList.PushTail(pIOReq);
 			OutputDebugString(_T("CUdpReceiver::Start WSARecv Fail"));
+			return -4;
 		}
 		else
-			m_nStatus = RECVSTATUSRUN;
+			m_nStatus = STATUSRUN;
 	}
 	else
 	{
-		m_nStatus = RECVSTATUSRUN;
+		m_nStatus = STATUSRUN;
 		OutputDebugString(_T("CUdpReceiver::Start WSARecv suc directly"));
 	}
 	m_nRecvNum++;
 
 	return 0;
 }
-
 int CUdpReceiver::Stop()
 {
-	m_nStatus = RECVSTATUSSTOP;
+	m_nStatus = STATUSSTOP;
 
 	if (m_UdpSocket != INVALID_SOCKET)
 	{
@@ -428,15 +363,12 @@ SOCKET CUdpReceiver::MakeMultiSocket( LPCTSTR plocalip, LPCTSTR psourceip, LPCTS
 			OutputDebugString(_T("CUdpReceiver::MakeMultiSocket WSAJoinLeaf suc"));
 	}
 
-	int optVal = 512 * 1024,length=4;
-	err = getsockopt(hMulticastSocket, SOL_SOCKET, SO_RCVBUF, (char*)&optVal, &length);
-	optVal = 512 * 1024;
+	int optVal = 512 * 1024;
 	err = setsockopt(hMulticastSocket, SOL_SOCKET, SO_RCVBUF, (char*)&optVal, sizeof(int));
 	if (err != 0)
 	{
 		OutputDebugString(_T("CUdpReceiver::MakeMultiSocket setsockopt SO_RCVBUF fail"));
 	}
-	err = getsockopt(hMulticastSocket, SOL_SOCKET, SO_RCVBUF, (char*)&optVal, &length);
 
 	return hMulticastSocket;
 }
@@ -452,6 +384,26 @@ int CUdpReceiver::ReturnBuf(unsigned char* pbuf)
 	long val = InterlockedExchangeAdd((long*)(pbuf - 4), -1);
 	if (val == 1) //返回的是操作前的值，所以判断是否为1，表示引用数是否为0
 		m_BufList.PushTail(pbuf);
+
+	return 0;
+}
+
+int CUdpReceiver::ReadedDataProcess(unsigned char* pdatabuf, int datasize)
+{
+	if (m_DataObserverList.empty())
+	{
+		m_BufList.PushTail(pdatabuf);
+	}
+	else
+	{
+		AcquireSRWLockExclusive(&m_ObserverLock);
+		for (auto iter = m_DataObserverList.begin(); iter != m_DataObserverList.end(); iter++)
+		{
+			InterlockedExchangeAdd((long*)(pdatabuf - 4), 1);
+			(*iter)->ImportData(pdatabuf, datasize, datasize, this);
+		}
+		ReleaseSRWLockExclusive(&m_ObserverLock);
+	}
 
 	return 0;
 }

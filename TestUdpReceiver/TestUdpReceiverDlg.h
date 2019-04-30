@@ -3,16 +3,16 @@
 //
 
 #pragma once
-#include "CalcCenter.h"
+#include "IOCompletionPortCenter.h"
 #include "afxcmn.h"
 #include "UdpReceiver.h"
+#include "Tcplistener.h"
+#include "Tcpworker.h"
 #include "filewriter.h"
 #include <list>
 using namespace std;
 
 #include "NoLockBiList.h"
-
-#define THREADNUM 20
 
 // CTestUdpReceiverDlg ¶Ô»°¿ò
 class CTestUdpReceiverDlg : public CDialogEx
@@ -40,19 +40,12 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
 
-
-	CCalcCenter m_CalcCenter;
+	CIOCompletionPortCenter m_CalcCenter;
 	CImageList m_itemImageList;
 	list<CUdpReceiver*> m_RecvList;
+	list<CTcpListener<CTcpWorker>*> m_TcpList;
 	list<CFileWriter*> m_FileList;
 	unsigned long m_nLastTickCount;
-
-	CNoLockBiList<int> templist;
-	bool m_brun;
-	HANDLE m_hThreads[THREADNUM];
-	unsigned int m_ThreadData;
-	static unsigned WINAPI InitTestThread(LPVOID pv);
-	unsigned TestThread();
 
 public:
 	CListCtrl m_cRecvList;
@@ -63,4 +56,9 @@ public:
 	afx_msg void OnBnClickedButtonStartall();
 	afx_msg void OnBnClickedButtonStopall();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	CListCtrl m_cTcpList;
+	afx_msg void OnBnClickedButtonTcpadd();
+	afx_msg void OnBnClickedButtonTcpstop();
+	afx_msg void OnBnClickedButtonTcpstart();
+	afx_msg void OnBnClickedButtonTcpdel();
 };
