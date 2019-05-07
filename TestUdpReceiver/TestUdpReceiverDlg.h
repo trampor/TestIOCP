@@ -8,8 +8,10 @@
 #include "UdpReceiver.h"
 #include "Tcplistener.h"
 #include "Tcpworker.h"
+#include "rtspserver.h"
 #include "filewriter.h"
 #include <list>
+#include "tcpconnecter.h"
 using namespace std;
 
 #include "NoLockBiList.h"
@@ -43,7 +45,8 @@ protected:
 	CIOCompletionPortCenter m_CalcCenter;
 	CImageList m_itemImageList;
 	list<CUdpReceiver*> m_RecvList;
-	list<CTcpListener<CTcpWorker>*> m_TcpList;
+	list<CTcpConnecter*> m_ClientList;
+	list<CTcpListener<CRtspServer>*> m_TcpList;
 	list<CFileWriter*> m_FileList;
 	unsigned long m_nLastTickCount;
 
@@ -61,4 +64,12 @@ public:
 	afx_msg void OnBnClickedButtonTcpstop();
 	afx_msg void OnBnClickedButtonTcpstart();
 	afx_msg void OnBnClickedButtonTcpdel();
+	afx_msg void OnBnClickedButtonClientadd();
+	afx_msg void OnBnClickedButtonClientstart();
+	afx_msg void OnBnClickedButtonClientstop();
+	afx_msg void OnBnClickedButtonClientdel();
+	afx_msg void OnBnClickedButtonStartallclient();
+	afx_msg void OnBnClickedButtonStopallclient();
+	CListCtrl m_cClientList;
+	afx_msg void OnBnClickedButtonDeleteallclient();
 };

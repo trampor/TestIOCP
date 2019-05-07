@@ -78,6 +78,24 @@
     <ClInclude Include="UdpReceiverIOReq.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="TcpConnecter.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TcpConnecterIOReq.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BufSource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectAllocater.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RtspServer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TestUdpReceiver.cpp">
@@ -120,6 +138,18 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="UdpReceiverIOReq.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TcpConnecter.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TcpConnecterIOReq.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RtspServer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ffutils.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

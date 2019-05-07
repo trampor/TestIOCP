@@ -13,6 +13,8 @@ CTcpListenerBase::CTcpListenerBase()
 	m_nStatus = STATUSSTOP;
 
 	m_nAcceptNum = 0;
+
+	lpfnAcceptEx = NULL;
 }
 
 
@@ -224,7 +226,7 @@ int CTcpListenerBase::Accept()
 		if (pDataBuf == NULL)
 		{
 			m_nStatus = STATUSERROR;
-			OutputDebugString(_T("CTcpListener::Start alloc new buf fail"));
+			OutputDebugString(_T("CTcpListenerBase::Accept alloc new buf fail"));
 			return -1;
 		}
 		InterlockedExchangeAdd(&m_BufList.m_nAllocatedEleNum, 1);
@@ -236,7 +238,7 @@ int CTcpListenerBase::Accept()
 		if (sock == INVALID_SOCKET)
 		{
 			m_nStatus = STATUSERROR;
-			OutputDebugString(_T("CTcpListener::Start alloc new socket fail"));
+			OutputDebugString(_T("CTcpListenerBase::Accept alloc new socket fail"));
 			m_BufList.PushTail(pDataBuf);
 			return -2;
 		}
@@ -249,7 +251,7 @@ int CTcpListenerBase::Accept()
 		if (pIOReq == NULL)
 		{
 			m_nStatus = STATUSERROR;
-			OutputDebugString(_T("CTcpListener::Start alloc new ioreq fail"));
+			OutputDebugString(_T("CTcpListenerBase::Accept alloc new ioreq fail"));
 			m_BufList.PushTail(pDataBuf);
 			m_SocketList.PushTail(sock);
 			return -3;
@@ -266,7 +268,7 @@ int CTcpListenerBase::Accept()
 		if (WSAGetLastError() != ERROR_IO_PENDING)
 		{
 			m_nStatus = STATUSERROR;
-			OutputDebugString(_T("CTcpListener::Start acceptex fail"));
+			OutputDebugString(_T("CTcpListenerBase::Accept acceptex fail"));
 			m_BufList.PushTail(pDataBuf);
 			m_SocketList.PushTail(sock);
 			m_IOReqList.PushTail(pIOReq);

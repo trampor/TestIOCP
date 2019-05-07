@@ -3,9 +3,10 @@
 #include "TcpListenerIOReq.h"
 #include "iocompletionportbase.h"
 #include <string>
+#include "ObjectAllocater.h"
 using namespace std;
 
-class CTcpListenerBase:public CReqObserver
+class CTcpListenerBase :public CReqObserver
 {
 public:
 	CTcpListenerBase();
@@ -36,7 +37,7 @@ protected:
 	static CNoLockBiList<CTcpListenerIOReq*> m_IOReqList;
 	long m_nAcceptNum;
 	SOCKET m_TcpSocket;
-	LPFN_ACCEPTEX lpfnAcceptEx = NULL;	//AcceptEx函数指针
+	LPFN_ACCEPTEX lpfnAcceptEx ;	//AcceptEx函数指针
 	LPFN_GETACCEPTEXSOCKADDRS lpfnGetAcceptExSockaddrs;  //加载GetAcceptExSockaddrs函数指针
 
 private:

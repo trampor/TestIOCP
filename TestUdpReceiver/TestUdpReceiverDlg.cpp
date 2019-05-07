@@ -96,9 +96,10 @@ CTestUdpReceiverDlg::~CTestUdpReceiverDlg()
 
 	CUdpReceiver::ReleaseAllList();
 	CTcpListenerBase::ReleaseAllList();
-	CTcpListener<CTcpWorker>::ReleaseAllList();
+	CTcpListener<CRtspServer>::ReleaseAllList();
 	CTcpWorker::ReleaseAllList();
 	CFileWriter::ReleaseAllList();
+	CTcpConnecter::ReleaseAllList();
 
 	//m_brun = false;
 	//WaitForMultipleObjects(THREADNUM, m_hThreads, true, INFINITE);
@@ -129,6 +130,7 @@ void CTestUdpReceiverDlg::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_LIST_RECVLIST, m_cRecvList);
 	DDX_Control(pDX, IDC_LIST_TCP, m_cTcpList);
+	DDX_Control(pDX, IDC_LIST_TCPCLIENT, m_cClientList);
 }
 
 BEGIN_MESSAGE_MAP(CTestUdpReceiverDlg, CDialogEx)
@@ -146,6 +148,10 @@ BEGIN_MESSAGE_MAP(CTestUdpReceiverDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_TCPSTOP, &CTestUdpReceiverDlg::OnBnClickedButtonTcpstop)
 	ON_BN_CLICKED(IDC_BUTTON_TCPSTART, &CTestUdpReceiverDlg::OnBnClickedButtonTcpstart)
 	ON_BN_CLICKED(IDC_BUTTON_TCPDEL, &CTestUdpReceiverDlg::OnBnClickedButtonTcpdel)
+	ON_BN_CLICKED(IDC_BUTTON_CLIENTADD, &CTestUdpReceiverDlg::OnBnClickedButtonClientadd)
+	ON_BN_CLICKED(IDC_BUTTON_STARTALLCLIENT, &CTestUdpReceiverDlg::OnBnClickedButtonStartallclient)
+	ON_BN_CLICKED(IDC_BUTTON_STOPALLCLIENT, &CTestUdpReceiverDlg::OnBnClickedButtonStopallclient)
+	ON_BN_CLICKED(IDC_BUTTON_DELETEALLCLIENT, &CTestUdpReceiverDlg::OnBnClickedButtonDeleteallclient)
 END_MESSAGE_MAP()
 
 
@@ -202,6 +208,10 @@ BOOL CTestUdpReceiverDlg::OnInitDialog()
 	SetDlgItemText(IDC_EDIT_TCPIP, _T("192.168.1.99"));
 	SetDlgItemText(IDC_EDIT_TCPPORT, _T("3333"));
 
+	SetDlgItemText(IDC_EDIT_SERVERIP, _T("192.168.1.99"));
+	SetDlgItemText(IDC_EDIT_SERVERPORT, _T("3333"));
+	SetDlgItemText(IDC_EDIT_CLIENTNUM, _T("1"));
+
 
 	m_cRecvList.SetImageList(&m_itemImageList, LVSIL_SMALL);
 	m_cRecvList.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_DOUBLEBUFFER);
@@ -223,6 +233,18 @@ BOOL CTestUdpReceiverDlg::OnInitDialog()
 	m_cTcpList.InsertColumn(2, _T("Link Num"), LVCFMT_CENTER, 150);
 	m_cTcpList.InsertColumn(3, _T("Status"), LVCFMT_CENTER, 150);
 
+	m_cClientList.SetImageList(&m_itemImageList, LVSIL_SMALL);
+	m_cClientList.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_DOUBLEBUFFER);
+	m_cClientList.InsertColumn(0, _T(""), LVCFMT_CENTER, 0);
+	m_cClientList.InsertColumn(1, _T("Server"), LVCFMT_CENTER, 120);
+	m_cClientList.InsertColumn(2, _T("Client"), LVCFMT_CENTER, 150);
+	m_cClientList.InsertColumn(3, _T("Status"), LVCFMT_CENTER, 80);
+	m_cClientList.InsertColumn(4, _T("ConnectTime"), LVCFMT_CENTER, 90);
+	m_cClientList.InsertColumn(5, _T("Recv"), LVCFMT_CENTER, 80);
+	m_cClientList.InsertColumn(6, _T("Recved"), LVCFMT_CENTER, 80);
+	m_cClientList.InsertColumn(7, _T("Write"), LVCFMT_CENTER, 80);
+	m_cClientList.InsertColumn(8, _T("Writed"), LVCFMT_CENTER, 80);
+	m_cClientList.InsertColumn(9, _T("error"), LVCFMT_CENTER, 80);
 
 	m_CalcCenter.InitObj(0);
 
@@ -477,6 +499,34 @@ void CTestUdpReceiverDlg::OnTimer(UINT_PTR nIDEvent)
 			m_cTcpList.SetItemText(index, 3, temp);
 			index++;
 		}
+
+		index = 0;
+		unsigned char datatemp[1024];
+		int recv, recved, write, writed, erro;
+		for (auto iter = m_ClientList.begin(); iter != m_ClientList.end(); iter++)
+		{
+			if ((*iter)->IsConnect())
+				(*iter)->Write(datatemp, 50);
+			{
+				m_cClientList.SetItemText(index, 2, (*iter)->GetLocalAddr());
+				_itow_s((*iter)->GetStatus(), temp, 10);
+				m_cClientList.SetItemText(index, 3, temp);
+				_itow_s((*iter)->GetConnectTime(), temp, 10);
+				m_cClientList.SetItemText(index, 4, temp);
+				(*iter)->GetRecvWriteNum(recv, recved, write, writed, erro);
+				_itow_s(recv, temp, 10);
+				m_cClientList.SetItemText(index, 5, temp);
+				_itow_s(recved, temp, 10);
+				m_cClientList.SetItemText(index, 6, temp);
+				_itow_s(write, temp, 10);
+				m_cClientList.SetItemText(index, 7, temp);
+				_itow_s(writed, temp, 10);
+				m_cClientList.SetItemText(index, 8, temp);
+				_itow_s(erro, temp, 10);
+				m_cClientList.SetItemText(index, 9, temp);
+			}
+			index++;
+		}
 		m_nLastTickCount = curtickcount;
 	}
 
@@ -492,7 +542,7 @@ void CTestUdpReceiverDlg::OnBnClickedButtonTcpadd()
 	GetDlgItemText(IDC_EDIT_TCPIP, localip, 256);
 	port = GetDlgItemInt(IDC_EDIT_TCPPORT);
 
-	CTcpListener<CTcpWorker> *precv = new CTcpListener<CTcpWorker>;
+	CTcpListener<CRtspServer> *precv = new CTcpListener<CRtspServer>;
 	int result = precv->InitObject(localip, port);
 	if (result < 0)
 		return;
@@ -576,4 +626,126 @@ void CTestUdpReceiverDlg::OnBnClickedButtonTcpdel()
 			index++;
 		}
 	}
+}
+
+void CTestUdpReceiverDlg::OnBnClickedButtonClientadd()
+{
+	TCHAR localip[256], temp[10];
+	int port,clientnum;
+
+	GetDlgItemText(IDC_EDIT_SERVERIP, localip, 256);
+	port = GetDlgItemInt(IDC_EDIT_SERVERPORT);
+	clientnum = GetDlgItemInt(IDC_EDIT_CLIENTNUM);
+
+	int res;
+	CTcpConnecter *pcleint ;
+	for (int i = 0; i < clientnum;i++)
+	{
+		pcleint = new CTcpConnecter;
+		res = pcleint->InitObject(localip, port, NULL);
+		if (res < 0)
+		{
+			pcleint->UninitObject();
+			delete pcleint;
+			continue;
+		}
+		m_ClientList.push_back(pcleint);
+		int index = m_cClientList.InsertItem(m_cClientList.GetItemCount(), NULL);
+		_itow_s(port, temp, 10);
+		CString tempstr = localip;
+		tempstr += _T(":");
+		tempstr += temp;
+		m_cClientList.SetItemText(index, 1, tempstr);
+	}
+}
+
+
+void CTestUdpReceiverDlg::OnBnClickedButtonClientstart()
+{
+	POSITION pos = m_cClientList.GetFirstSelectedItemPosition();
+	while (pos != NULL)
+	{
+		int cursel = m_cClientList.GetNextSelectedItem(pos);
+		int index = 0;
+		for (auto iter = m_ClientList.begin(); iter != m_ClientList.end(); iter++)
+		{
+			if (index == cursel)
+			{
+				if ((*iter)->Start() < 0)
+				{
+					OutputDebugString(_T("client start fail"));
+					(*iter)->Stop();
+				}
+				break;
+			}
+			index++;
+		}
+		break;
+	}
+}
+
+
+void CTestUdpReceiverDlg::OnBnClickedButtonClientstop()
+{
+	POSITION pos = m_cClientList.GetFirstSelectedItemPosition();
+	while (pos != NULL)
+	{
+		int cursel = m_cClientList.GetNextSelectedItem(pos);
+		int index = 0;
+		for (auto iter = m_ClientList.begin(); iter != m_ClientList.end(); iter++)
+		{
+			if (index == cursel)
+			{
+				(*iter)->Stop();
+				break;
+			}
+			index++;
+		}
+		break;
+	}
+}
+
+
+void CTestUdpReceiverDlg::OnBnClickedButtonClientdel()
+{
+	// TODO:  在此添加控件通知处理程序代码
+}
+
+
+void CTestUdpReceiverDlg::OnBnClickedButtonStartallclient()
+{
+	for (auto iter = m_ClientList.begin(); iter != m_ClientList.end(); iter++)
+	{
+		if ((*iter)->Start() < 0)
+		{
+			OutputDebugString(_T("client start fail"));
+			(*iter)->Stop();
+		}
+	}
+}
+
+
+void CTestUdpReceiverDlg::OnBnClickedButtonStopallclient()
+{
+	for (auto iter = m_ClientList.begin(); iter != m_ClientList.end(); iter++)
+	{
+		(*iter)->Stop();
+	}
+}
+
+
+void CTestUdpReceiverDlg::OnBnClickedButtonDeleteallclient()
+{
+	for (auto iter = m_ClientList.begin(); iter != m_ClientList.end(); iter++)
+	{
+		(*iter)->Stop();
+	}
+	Sleep(1000);
+	for (auto iter = m_ClientList.begin(); iter != m_ClientList.end(); iter++)
+	{
+		delete (*iter);
+	}
+	m_ClientList.clear();
+
+	m_cClientList.DeleteAllItems();
 }

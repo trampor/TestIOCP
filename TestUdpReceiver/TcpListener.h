@@ -3,7 +3,7 @@
 #include "TcpListenerBase.h"
 
 template <class WorkerType>
-class CTcpListener :  public CTcpListenerBase
+class CTcpListener : public CTcpListenerBase, public CObjectAllocater
 {
 public:
 	CTcpListener();
@@ -16,7 +16,7 @@ public:
 
 	static int ReleaseAllList();
 
-	int ReleaseWorker(WorkerType* pworker);
+	int ReleaseObject(PVOID pobject);
 
 private:
 	static CNoLockBiList<WorkerType*> m_WorkerList;
@@ -77,6 +77,7 @@ int CTcpListener<WorkerType>::ConsumeReq(int bytenumber, int ck, unsigned long e
 		}
 		else
 		{
+			//InterlockedExchangeAdd(&m_nErrorNum, 1);
 			if (povlp != NULL)
 			{
 				if (((CTcpListenerIOReq*)povlp)->m_Socket != INVALID_SOCKET)
@@ -136,9 +137,9 @@ int CTcpListener<WorkerType>::ReleaseAllList()
 }
 
 template <class WorkerType>
-int  CTcpListener<WorkerType>::ReleaseWorker(WorkerType* pworker)
+int  CTcpListener<WorkerType>::ReleaseObject(PVOID pobject)
 {
-	m_WorkerList.PushTail(pworker);
+	m_WorkerList.PushTail((WorkerType*)pobject);
 	InterlockedExchangeAdd(&m_nAcceptNum, -1);
 	return 0;
 }

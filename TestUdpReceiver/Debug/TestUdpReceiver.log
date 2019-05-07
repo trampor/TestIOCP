@@ -1,34 +1,49 @@
-﻿生成启动时间为 2019/4/30 15:30:56。
+﻿生成启动时间为 2019/5/7 17:13:53。
      1>项目“D:\TestIOCP\TestUdpReceiver\TestUdpReceiver.vcxproj”在节点 2 上(Rebuild 个目标)。
      1>ClCompile:
-         D:\Program Files\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D _USING_V110_SDK71_ /D _UNICODE /D UNICODE /D _AFXDLL /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yc"stdafx.h" /Fp"Debug\TestUdpReceiver.pch" /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt stdafx.cpp
+         D:\Program Files\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D HAVE_GETSYSTEMTIMEASFILETIME /D _CRT_SECURE_NO_WARNINGS /D _USING_V110_SDK71_ /D _UNICODE /D UNICODE /D _AFXDLL /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yc"stdafx.h" /Fp"Debug\TestUdpReceiver.pch" /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt stdafx.cpp
          stdafx.cpp
-         D:\Program Files\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D _USING_V110_SDK71_ /D _UNICODE /D UNICODE /D _AFXDLL /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Debug\TestUdpReceiver.pch" /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt IOCompletionPortCenter.cpp FileWriter.cpp FileWriterIOReq.cpp IOCompletionPortBase.cpp IOReq.cpp TcpListenerBase.cpp TcpListenerIOReq.cpp TcpWorkerIOReq.cpp TcpWorker.cpp TestUdpReceiver.cpp TestUdpReceiverDlg.cpp UdpReceiver.cpp UdpReceiverIOReq.cpp
+         D:\Program Files\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D HAVE_GETSYSTEMTIMEASFILETIME /D _CRT_SECURE_NO_WARNINGS /D _USING_V110_SDK71_ /D _UNICODE /D UNICODE /D _AFXDLL /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Debug\TestUdpReceiver.pch" /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt ffutils.cpp IOCompletionPortCenter.cpp FileWriter.cpp FileWriterIOReq.cpp IOCompletionPortBase.cpp IOReq.cpp RtspServer.cpp TcpConnecter.cpp TcpConnecterIOReq.cpp TcpListenerBase.cpp TcpListenerIOReq.cpp TcpWorkerIOReq.cpp TcpWorker.cpp TestUdpReceiver.cpp TestUdpReceiverDlg.cpp UdpReceiver.cpp UdpReceiverIOReq.cpp
          UdpReceiverIOReq.cpp
          UdpReceiver.cpp
          TestUdpReceiverDlg.cpp
-     1>d:\testiocp\testudpreceiver\testudpreceiverdlg.cpp(454): warning C4244: “参数”: 从“double”转换到“int”，可能丢失数据
+     1>d:\testiocp\testudpreceiver\testudpreceiverdlg.cpp(476): warning C4244: “参数”: 从“double”转换到“int”，可能丢失数据
          TestUdpReceiver.cpp
          TcpWorker.cpp
          TcpWorkerIOReq.cpp
          TcpListenerIOReq.cpp
          TcpListenerBase.cpp
+         TcpConnecterIOReq.cpp
+         TcpConnecter.cpp
+         RtspServer.cpp
+     1>d:\testiocp\testudpreceiver\rtspserver.cpp(296): warning C4101: “ctl_host”: 未引用的局部变量
+     1>d:\testiocp\testudpreceiver\rtspserver.cpp(296): warning C4101: “ctl_path”: 未引用的局部变量
+     1>d:\testiocp\testudpreceiver\rtspserver.cpp(297): warning C4101: “ctl_port”: 未引用的局部变量
+     1>d:\testiocp\testudpreceiver\rtspserver.cpp(296): warning C4101: “ctl_auth”: 未引用的局部变量
+     1>d:\testiocp\testudpreceiver\rtspserver.cpp(599): warning C4390: “;”: 找到空的受控语句；这是否是有意的?
+     1>d:\testiocp\testudpreceiver\rtspserver.cpp(579): warning C4101: “url”: 未引用的局部变量
          IOReq.cpp
          IOCompletionPortBase.cpp
          FileWriterIOReq.cpp
          FileWriter.cpp
          IOCompletionPortCenter.cpp
+         ffutils.cpp
+     1>d:\testiocp\testudpreceiver\ffutils.cpp(633): warning C4390: “;”: 找到空的受控语句；这是否是有意的?
          正在生成代码...
        ResourceCompile:
          C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\bin\rc.exe /D _DEBUG /D _USING_V110_SDK71_ /D _UNICODE /D UNICODE /D _AFXDLL /l"0x0804" /IDebug\ /nologo /fo"Debug\TestUdpReceiver.res" TestUdpReceiver.rc 
        Link:
          D:\Program Files\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\TestIOCP\Debug\TestUdpReceiver.exe" /INCREMENTAL /NOLOGO /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /manifestinput:"D:\Program Files\Microsoft Visual Studio 12.0\VC\Include\Manifest\dpiaware.manifest" /DEBUG /PDB:"D:\TestIOCP\Debug\TestUdpReceiver.pdb" /SUBSYSTEM:WINDOWS,"5.01" /TLBID:1 /ENTRY:"wWinMainCRTStartup" /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\TestIOCP\Debug\TestUdpReceiver.lib" /MACHINE:X86 Debug\TestUdpReceiver.res
+         Debug\ffutils.obj
          Debug\IOCompletionPortCenter.obj
          Debug\FileWriter.obj
          Debug\FileWriterIOReq.obj
          Debug\IOCompletionPortBase.obj
          Debug\IOReq.obj
+         Debug\RtspServer.obj
          Debug\stdafx.obj
+         Debug\TcpConnecter.obj
+         Debug\TcpConnecterIOReq.obj
          Debug\TcpListenerBase.obj
          Debug\TcpListenerIOReq.obj
          Debug\TcpWorkerIOReq.obj
@@ -42,4 +57,4 @@
 
 生成成功。
 
-已用时间 00:00:48.61
+已用时间 00:00:39.27

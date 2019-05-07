@@ -211,6 +211,8 @@ int CUdpReceiver::Read()
 
 	return 0;
 }
+
+
 int CUdpReceiver::Stop()
 {
 	m_nStatus = STATUSSTOP;

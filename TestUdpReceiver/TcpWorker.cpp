@@ -34,16 +34,16 @@ int CTcpWorker::ConsumeReq(int bytenumber, int ck, unsigned long error, OVERLAPP
 
 			if (bytenumber == 0)//peer socket closed
 			{
-				OutputDebugString(_T("CTcpWorker::ConsumeReq peer socket is closed"));
+				//OutputDebugString(_T("CTcpWorker::ConsumeReq peer socket is closed"));
 				m_BufList.PushTail(((CTcpWorkerIOReq*)povlp)->m_pDataBuf);
 				m_IOReqList.PushTail((CTcpWorkerIOReq*)povlp);
 				UninitObject();
 				if (IsOver())
 				{
 					CString tempstr;
-					tempstr.Format(_T("CTcpWorker::ConsumeReq %X:%u - %X:%u session is over"), ntohl(m_nServerIp), ntohs(m_nServerPort), ntohl(m_nClientIp), ntohs(m_nClientPort));
+					tempstr.Format(_T("CTcpWorker::ConsumeReq %X:%u - %X:%u session is over1"), ntohl(m_nServerIp), ntohs(m_nServerPort), ntohl(m_nClientIp), ntohs(m_nClientPort));
 					OutputDebugString(tempstr);
-					m_pListener->ReleaseWorker(this);
+					m_pListener->ReleaseObject(this);
 				}
 				return -1;
 			}
@@ -57,9 +57,9 @@ int CTcpWorker::ConsumeReq(int bytenumber, int ck, unsigned long error, OVERLAPP
 					if (IsOver())
 					{
 						CString tempstr;
-						tempstr.Format(_T("CTcpWorker::ConsumeReq %X:%u - %X:%u session is over"), ntohl(m_nServerIp), ntohs(m_nServerPort), ntohl(m_nClientIp), ntohs(m_nClientPort));
+						tempstr.Format(_T("CTcpWorker::ConsumeReq %X:%u - %X:%u session is over2"), ntohl(m_nServerIp), ntohs(m_nServerPort), ntohl(m_nClientIp), ntohs(m_nClientPort));
 						OutputDebugString(tempstr);
-						m_pListener->ReleaseWorker(this);
+						m_pListener->ReleaseObject(this);
 					}
 					return -2;
 				}
@@ -75,53 +75,54 @@ int CTcpWorker::ConsumeReq(int bytenumber, int ck, unsigned long error, OVERLAPP
 		}
 		else
 		{
-			InterlockedExchangeAdd(&m_nErrorNum,1);
 			OutputDebugString(_T("CTcpWorker::ConsumeReq unknown type"));
 			m_BufList.PushTail(((CTcpWorkerIOReq*)povlp)->m_pDataBuf);
 			m_IOReqList.PushTail((CTcpWorkerIOReq*)povlp);
 			UninitObject();
+			InterlockedExchangeAdd(&m_nErrorNum,1);
 			if (IsOver())
 			{
 				CString tempstr;
-				tempstr.Format(_T("CTcpWorker::ConsumeReq %X:%u - %X:%u session is over"), ntohl(m_nServerIp), ntohs(m_nServerPort), ntohl(m_nClientIp), ntohs(m_nClientPort));
+				tempstr.Format(_T("CTcpWorker::ConsumeReq %X:%u - %X:%u session is over3"), ntohl(m_nServerIp), ntohs(m_nServerPort), ntohl(m_nClientIp), ntohs(m_nClientPort));
 				OutputDebugString(tempstr);
-				m_pListener->ReleaseWorker(this);
+				m_pListener->ReleaseObject(this);
 			}
-			return -2;
+			return -3;
 		}
 	}
 	else
 	{
-		InterlockedExchangeAdd(&m_nErrorNum,1);
 		if (povlp != NULL)
 		{
+			if (((CTcpWorkerIOReq*)povlp)->m_nOperateType == CK_SOCKET_READ)
+			{
+				OutputDebugString(_T("CTcpWorker::ConsumeReq iocomplete read error"));
+			}
+			else if (((CTcpWorkerIOReq*)povlp)->m_nOperateType == CK_SOCKET_WRITE)
+			{
+				OutputDebugString(_T("CTcpWorker::ConsumeReq iocomplete write error"));
+			}
+			else 
+			{
+				OutputDebugString(_T("CTcpWorker::ConsumeReq iocomplete unkown type error"));
+			}
+
 			if (((CTcpWorkerIOReq*)povlp)->m_pDataBuf != NULL)
 				m_BufList.PushTail(((CTcpWorkerIOReq*)povlp)->m_pDataBuf);
 
 			m_IOReqList.PushTail((CTcpWorkerIOReq*)povlp);
 		}
 		m_nStatus = STATUSERROR;
-		if (((CTcpWorkerIOReq*)povlp)->m_nOperateType == CK_SOCKET_READ)
-		{
-			OutputDebugString(_T("CTcpWorker::ConsumeReq iocomplete read error"));
-		}
-		else if (((CTcpWorkerIOReq*)povlp)->m_nOperateType == CK_SOCKET_WRITE)
-		{
-			OutputDebugString(_T("CTcpWorker::ConsumeReq iocomplete write error"));
-		}
-		else 
-		{
-			OutputDebugString(_T("CTcpWorker::ConsumeReq iocomplete unkown type error"));
-		}
 		UninitObject();
+		InterlockedExchangeAdd(&m_nErrorNum,1);
 		if (IsOver())
 		{
 			CString tempstr;
-			tempstr.Format(_T("CTcpWorker::ConsumeReq %X:%u - %X:%u session is over"), ntohl(m_nServerIp), ntohs(m_nServerPort), ntohl(m_nClientIp), ntohs(m_nClientPort));
+			tempstr.Format(_T("CTcpWorker::ConsumeReq %X:%u - %X:%u session is over4"), ntohl(m_nServerIp), ntohs(m_nServerPort), ntohl(m_nClientIp), ntohs(m_nClientPort));
 			OutputDebugString(tempstr);
-			m_pListener->ReleaseWorker(this);
+			m_pListener->ReleaseObject(this);
 		}
-		return -3;
+		return -4;
 	}
 
 	//再次接收
@@ -134,14 +135,14 @@ int CTcpWorker::ConsumeReq(int bytenumber, int ck, unsigned long error, OVERLAPP
 			CString tempstr;
 			tempstr.Format(_T("CTcpWorker::ConsumeReq %X:%u - %X:%u session is over"), ntohl(m_nServerIp), ntohs(m_nServerPort), ntohl(m_nClientIp), ntohs(m_nClientPort));
 			OutputDebugString(tempstr);
-			m_pListener->ReleaseWorker(this);
+			m_pListener->ReleaseObject(this);
 		}
 	}
 
 	return 0;
 }
 
-int CTcpWorker::InitObject(unsigned int serverip, int serverport, unsigned int clientip, int clientport, SOCKET& insock, CTcpListener<CTcpWorker>* plisten)
+int CTcpWorker::InitObject(unsigned int serverip, int serverport, unsigned int clientip, int clientport, SOCKET& insock, CObjectAllocater* pallocater)
 {
 	if (insock == INVALID_SOCKET)
 		return -1;
@@ -152,7 +153,7 @@ int CTcpWorker::InitObject(unsigned int serverip, int serverport, unsigned int c
 	m_nClientIp = clientip;
 	m_nClientPort = clientport;
 
-	m_pListener = plisten;
+	m_pListener = pallocater;
 
 	unsigned char* ptempbuf;
 	for (int i = 0; i < 1; i++)
@@ -263,9 +264,9 @@ int CTcpWorker::Read()
 
 	m_nFlag = 0;
 	m_unRecvedNumber = 0;
-	m_WSABUF.buf = (char*)pDataBuf;
-	m_WSABUF.len = RECVBUFSIZE-4;
-	int result = WSARecv(m_TcpSocket, &m_WSABUF, 1, &m_unRecvedNumber, &m_nFlag, pIOReq, NULL);
+	m_RWSABUF.buf = (char*)pDataBuf;
+	m_RWSABUF.len = RECVBUFSIZE-4;
+	int result = WSARecv(m_TcpSocket, &m_RWSABUF, 1, &m_unRecvedNumber, &m_nFlag, pIOReq, NULL);
 	if (result == SOCKET_ERROR)
 	{
 		if (WSA_IO_PENDING != WSAGetLastError())
@@ -327,9 +328,9 @@ int CTcpWorker::Write(unsigned char* pdatabuf, int datsize)
 	pIOReq->m_nBufSize = datsize;
 
 	m_nFlag = 0;
-	m_WSABUF.buf = (char*)pDataBuf;
-	m_WSABUF.len = datsize;
-	int result = WSASend(m_TcpSocket, &m_WSABUF, 1, NULL, m_nFlag, pIOReq, NULL);
+	m_WWSABUF.buf = (char*)pDataBuf;
+	m_WWSABUF.len = datsize;
+	int result = WSASend(m_TcpSocket, &m_WWSABUF, 1, NULL, m_nFlag, pIOReq, NULL);
 	if (result == SOCKET_ERROR)
 	{
 		if (WSA_IO_PENDING != WSAGetLastError())

@@ -2,7 +2,7 @@
 #include "tcpworkerIOReq.h"
 #include "iocompletionportbase.h"
 #include "NoLockBiList.h"
-#include "tcplistener.h"
+#include "ObjectAllocater.h"
 
 class CTcpWorker : public CReqObserver
 {
@@ -12,7 +12,7 @@ public:
 
 	int ConsumeReq(int bytenumber, int ck, unsigned long error, OVERLAPPED *povlp);
 
-	virtual int InitObject(unsigned int serverip, int serverport, unsigned int clientip, int clientport, SOCKET& insock, CTcpListener<CTcpWorker>* plisten);
+	virtual int InitObject(unsigned int serverip, int serverport, unsigned int clientip, int clientport, SOCKET& insock, CObjectAllocater* pallocater);
 	virtual int UninitObject();
 
 	virtual int Start();
@@ -20,14 +20,16 @@ public:
 
 	static int ReleaseAllList();
 
+protected:
 	virtual int ReadedDataProcess(unsigned char* pdatabuf, int datasize);
-private:
 	int Write(unsigned char* pdatabuf,int datsize);
+
+private:
 	int Read();
 	bool IsOver();
 
 private:
-	CTcpListener<CTcpWorker>* m_pListener;
+	CObjectAllocater* m_pListener;
 
 	SOCKET m_TcpSocket;
 	unsigned int m_nServerIp;
@@ -36,7 +38,7 @@ private:
 	int m_nClientPort;
 
 	unsigned long m_unRecvedNumber, m_nFlag;
-	WSABUF m_WSABUF;
+	WSABUF m_RWSABUF, m_WWSABUF;
 	long m_nPacketNum;
 	int m_nStatus,res;
 
@@ -45,7 +47,9 @@ private:
 	long m_nRecvNum, m_nRecvedNum, m_nErrorNum;
 	long m_nWriteNum, m_nWritedNum;
 
-	static CNoLockBiList<unsigned char*> m_BufList;
 	static CNoLockBiList<CTcpWorkerIOReq*> m_IOReqList;
+
+protected:
+	static CNoLockBiList<unsigned char*> m_BufList;
 };
 
